@@ -4129,6 +4129,19 @@ VkPipeline d3d12_pipeline_state_create_pipeline_variant(struct d3d12_pipeline_st
     return vk_pipeline;
 }
 
+static bool d3d12_pipeline_state_can_use_dynamic_primitive_restart(struct d3d12_pipeline_state *state,
+        const struct vkd3d_dynamic_state *dyn_state)
+{
+    struct d3d12_graphics_pipeline_state *graphics = &state->graphics;
+
+    /* TODO: extended_dynamic_state2 lets us dynamically toggle primitive restart states. */
+
+    /* StripCutValue only applies to strip primitives, for list primitives, primitive restart must
+     * be ignored, but our PSO was created with primitiveRestart enabled. */
+    return !state->graphics.index_buffer_strip_cut_value ||
+            vk_primitive_topology_supports_restart(dyn_state->vk_primitive_topology);
+}
+
 static bool d3d12_pipeline_state_can_use_dynamic_stride(struct d3d12_pipeline_state *state,
         const struct vkd3d_dynamic_state *dyn_state)
 {
@@ -4202,6 +4215,12 @@ VkPipeline d3d12_pipeline_state_get_pipeline(struct d3d12_pipeline_state *state,
         return VK_NULL_HANDLE;
     }
 
+    if (!d3d12_pipeline_state_can_use_dynamic_primitive_restart(state, dyn_state))
+    {
+        TRACE("Cannnot use primitive restart with current topology, falling back ...\n");
+        return VK_NULL_HANDLE;
+    }
+
     /* It should be illegal to use different patch size for topology compared to pipeline, but be safe here. */
     if (dyn_state->vk_primitive_topology == VK_PRIMITIVE_TOPOLOGY_PATCH_LIST &&
         (dyn_state->primitive_topology - D3D_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST + 1) != graphics->patch_vertex_count)
@@ -4244,8 +4263,9 @@ VkPipeline d3d12_pipeline_state_get_or_create_pipeline(struct d3d12_pipeline_sta
     extended_dynamic_state = device->device_info.extended_dynamic_state_features.extendedDynamicState;
 
     if (extended_dynamic_state &&
-        graphics->primitive_topology_type != D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH &&
-        graphics->primitive_topology_type != D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED)
+            graphics->primitive_topology_type != D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH &&
+            graphics->primitive_topology_type != D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED &&
+            d3d12_pipeline_state_can_use_dynamic_primitive_restart(state, dyn_state))
         pipeline_key.dynamic_topology = true;
     else
         pipeline_key.topology = dyn_state->primitive_topology;

@@ -1544,6 +1544,21 @@ static inline bool d3d12_pipeline_state_has_unknown_dsv_format(struct d3d12_pipe
     return false;
 }
 
+static inline bool vk_primitive_topology_supports_restart(VkPrimitiveTopology topology)
+{
+    switch (topology)
+    {
+        case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP:
+        case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY:
+        case VK_PRIMITIVE_TOPOLOGY_LINE_STRIP:
+        case VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
 struct d3d12_pipeline_state_desc
 {
     ID3D12RootSignature *root_signature;
