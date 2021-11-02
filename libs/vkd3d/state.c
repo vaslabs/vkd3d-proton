@@ -3015,6 +3015,7 @@ static uint32_t d3d12_graphics_pipeline_state_init_dynamic_state(struct d3d12_pi
         { VKD3D_DYNAMIC_STATE_TOPOLOGY,              VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY_EXT },
         { VKD3D_DYNAMIC_STATE_VERTEX_BUFFER_STRIDE,  VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE_EXT },
         { VKD3D_DYNAMIC_STATE_FRAGMENT_SHADING_RATE, VK_DYNAMIC_STATE_FRAGMENT_SHADING_RATE_KHR },
+        { VKD3D_DYNAMIC_STATE_PRIMITIVE_RESTART,     VK_DYNAMIC_STATE_PRIMITIVE_RESTART_ENABLE_EXT },
     };
 
     dynamic_state_flags = 0;
@@ -3061,6 +3062,10 @@ static uint32_t d3d12_graphics_pipeline_state_init_dynamic_state(struct d3d12_pi
      * so we don't need to worry about side effects when there are no render targets. */
     if (d3d12_device_supports_variable_shading_rate_tier_1(state->device) && graphics->rt_count)
         dynamic_state_flags |= VKD3D_DYNAMIC_STATE_FRAGMENT_SHADING_RATE;
+
+    if (state->device->device_info.extended_dynamic_state2_features.extendedDynamicState2 &&
+            graphics->index_buffer_strip_cut_value)
+        dynamic_state_flags |= VKD3D_DYNAMIC_STATE_PRIMITIVE_RESTART;
 
     /* Build dynamic state create info */
     for (i = 0, count = 0; i < ARRAY_SIZE(dynamic_state_list); i++)
@@ -4132,13 +4137,14 @@ VkPipeline d3d12_pipeline_state_create_pipeline_variant(struct d3d12_pipeline_st
 static bool d3d12_pipeline_state_can_use_dynamic_primitive_restart(struct d3d12_pipeline_state *state,
         const struct vkd3d_dynamic_state *dyn_state)
 {
-    struct d3d12_graphics_pipeline_state *graphics = &state->graphics;
+    const struct d3d12_graphics_pipeline_state *graphics = &state->graphics;
 
-    /* TODO: extended_dynamic_state2 lets us dynamically toggle primitive restart states. */
+    if (graphics->dynamic_state_flags & VKD3D_DYNAMIC_STATE_PRIMITIVE_RESTART)
+        return true;
 
     /* StripCutValue only applies to strip primitives, for list primitives, primitive restart must
      * be ignored, but our PSO was created with primitiveRestart enabled. */
-    return !state->graphics.index_buffer_strip_cut_value ||
+    return !graphics->index_buffer_strip_cut_value ||
             vk_primitive_topology_supports_restart(dyn_state->vk_primitive_topology);
 }
 

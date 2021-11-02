@@ -1389,7 +1389,7 @@ HRESULT vkd3d_create_descriptor_set_layout(struct d3d12_device *device,
         VkDescriptorSetLayoutCreateFlags flags, unsigned int binding_count,
         const VkDescriptorSetLayoutBinding *bindings, VkDescriptorSetLayout *set_layout);
 
-#define VKD3D_MAX_DYNAMIC_STATE_COUNT (7)
+#define VKD3D_MAX_DYNAMIC_STATE_COUNT (8)
 
 enum vkd3d_dynamic_state_flag
 {
@@ -1404,6 +1404,7 @@ enum vkd3d_dynamic_state_flag
     VKD3D_DYNAMIC_STATE_SCISSOR_COUNT         = (1 << 8),
     VKD3D_DYNAMIC_STATE_VERTEX_BUFFER_STRIDE  = (1 << 9),
     VKD3D_DYNAMIC_STATE_FRAGMENT_SHADING_RATE = (1 << 10),
+    VKD3D_DYNAMIC_STATE_PRIMITIVE_RESTART     = (1 << 11),
 };
 
 struct vkd3d_shader_debug_ring_spec_constants
