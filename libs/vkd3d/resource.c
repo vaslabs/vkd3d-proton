@@ -3218,8 +3218,6 @@ static bool vkd3d_create_vk_buffer_view(struct d3d12_device *device,
     }
 
     alignment = vkd3d_get_required_texel_buffer_alignment(device, format);
-    if (offset % alignment)
-        FIXME("Offset %#"PRIx64" violates the required alignment %#"PRIx64".\n", offset, alignment);
 
     view_desc.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
     view_desc.pNext = NULL;
