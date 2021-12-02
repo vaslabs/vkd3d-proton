@@ -4362,7 +4362,7 @@ static bool d3d12_command_list_has_depth_stencil_view(struct d3d12_command_list 
     assert(d3d12_pipeline_state_is_graphics(list->state));
     graphics = &list->state->graphics;
 
-    return list->dsv.format && (graphics->dsv_format || d3d12_pipeline_state_has_unknown_dsv_format(list->state));
+    return graphics->dsv_format || (d3d12_pipeline_state_has_unknown_dsv_format(list->state) && list->dsv.format);
 }
 
 static void d3d12_command_list_get_fb_extent(struct d3d12_command_list *list,
