@@ -236,6 +236,24 @@ static bool vkd3d_get_format_compatibility_list(const struct d3d12_device *devic
             for (i = 0; i < ARRAY_SIZE(r32_uav_formats); i++)
                 vkd3d_format_compatibility_list_add_format(&list, r32_uav_formats[i]);
         }
+
+        /* 64-bit image atomics in D3D12 are done through RG32_UINT instead.
+         * We don't actually create 64-bit image views correctly at the moment,
+         * but adding the alias gives a clear signal to driver that we might use atomics on the image,
+         * which should disable compression or similar.
+         * If we can create R32G32_UINT views on this resource, we need to add R64_UINT as well as a potential
+         * mutable format. */
+        if (device->device_info.shader_image_atomic_int64_features.shaderImageInt64Atomics)
+        {
+            for (i = 0; i < list.format_count; i++)
+            {
+                if (list.vk_formats[i] == VK_FORMAT_R32G32_UINT)
+                {
+                    vkd3d_format_compatibility_list_add_format(&list, VK_FORMAT_R64_UINT);
+                    break;
+                }
+            }
+        }
     }
 
     if (list.format_count < 2)
@@ -3153,33 +3171,6 @@ void d3d12_desc_copy(struct d3d12_desc *dst, struct d3d12_desc *src,
     }
 }
 
-static VkDeviceSize vkd3d_get_required_texel_buffer_alignment(const struct d3d12_device *device,
-        const struct vkd3d_format *format)
-{
-    const VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT *properties;
-    const struct vkd3d_vulkan_info *vk_info = &device->vk_info;
-    VkDeviceSize alignment;
-
-    if (vk_info->EXT_texel_buffer_alignment)
-    {
-        properties = &vk_info->texel_buffer_alignment_properties;
-
-        alignment = max(properties->storageTexelBufferOffsetAlignmentBytes,
-                properties->uniformTexelBufferOffsetAlignmentBytes);
-
-        if (properties->storageTexelBufferOffsetSingleTexelAlignment
-                && properties->uniformTexelBufferOffsetSingleTexelAlignment)
-        {
-            assert(!vkd3d_format_is_compressed(format));
-            return min(format->byte_count, alignment);
-        }
-
-        return alignment;
-    }
-
-    return vk_info->device_limits.minTexelBufferOffsetAlignment;
-}
-
 bool vkd3d_create_raw_r32ui_vk_buffer_view(struct d3d12_device *device,
         VkBuffer vk_buffer, VkDeviceSize offset, VkDeviceSize range, VkBufferView *vk_view)
 {
@@ -3208,7 +3199,6 @@ static bool vkd3d_create_vk_buffer_view(struct d3d12_device *device,
 {
     const struct vkd3d_vk_device_procs *vk_procs = &device->vk_procs;
     struct VkBufferViewCreateInfo view_desc;
-    VkDeviceSize alignment;
     VkResult vr;
 
     if (vkd3d_format_is_compressed(format))
@@ -3216,10 +3206,6 @@ static bool vkd3d_create_vk_buffer_view(struct d3d12_device *device,
         WARN("Invalid format for buffer view %#x.\n", format->dxgi_format);
         return false;
     }
-
-    alignment = vkd3d_get_required_texel_buffer_alignment(device, format);
-    if (offset % alignment)
-        FIXME("Offset %#"PRIx64" violates the required alignment %#"PRIx64".\n", offset, alignment);
 
     view_desc.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
     view_desc.pNext = NULL;
