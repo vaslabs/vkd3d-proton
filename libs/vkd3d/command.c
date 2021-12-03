@@ -2104,7 +2104,7 @@ static int d3d12_command_list_find_attachment_view(struct d3d12_command_list *li
 {
     unsigned int i;
 
-    if (list->dsv.resource == resource)
+    if (list->dsv.resource == resource && list->dsv.view)
     {
         const struct vkd3d_view *dsv = list->dsv.view;
 
