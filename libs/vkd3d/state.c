@@ -2838,8 +2838,10 @@ static unsigned int vkd3d_get_rt_format_swizzle(const struct vkd3d_format *forma
 STATIC_ASSERT(sizeof(struct vkd3d_shader_transform_feedback_element) == sizeof(D3D12_SO_DECLARATION_ENTRY));
 
 static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
-        struct d3d12_graphics_pipeline_state *graphics, struct d3d12_device *device,
-        uint32_t rtv_active_mask, const struct vkd3d_format *dynamic_dsv_format,
+        struct d3d12_graphics_pipeline_state *graphics, 
+        struct d3d12_device *device,
+        uint32_t rtv_active_mask, 
+        const struct vkd3d_format *dynamic_dsv_format,
         uint32_t plane_optimal_mask,
         VkRenderPass *vk_render_pass,
         uint32_t *out_plane_optimal_mask,
@@ -2868,7 +2870,8 @@ static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
             WARN("ATTACHMENT DYNAMIC DSV FORMAT\n");
             dsv_format = dynamic_dsv_format->vk_format;
             aspects = dynamic_dsv_format->vk_aspect_mask;
-        }
+        } else
+            WARN("NO DYNAMIC DSV FORMAT\n");
     }
 
     if (dsv_format)
