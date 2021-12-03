@@ -4588,7 +4588,7 @@ static bool d3d12_command_list_update_graphics_pipeline(struct d3d12_command_lis
      * and crash later when looking at DSV formats. */
     if (!list->dsv.view && list->state->graphics.dsv_format)
     {
-        WARN("Attempting to render dsv format %#x\n", list->state->graphics.dsv_format);
+        WARN("Attempting to render dsv format %#x\n", list->state->graphics.dsv_format.Format);
     }
 
     variant_flags = d3d12_command_list_variant_flags(list);
