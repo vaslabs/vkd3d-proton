@@ -2876,6 +2876,11 @@ static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
 
     if (dsv_format)
     {
+        WARN(
+            "Front write mask/Back write mask %u == %u\n", 
+            graphics->ds_desc.front.writeMask,
+            graphics->ds_desc.back.writeMask
+        );
         assert(graphics->ds_desc.front.writeMask == graphics->ds_desc.back.writeMask);
 
         if (aspects & VK_IMAGE_ASPECT_DEPTH_BIT)
