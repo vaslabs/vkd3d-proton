@@ -2957,7 +2957,7 @@ static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
     for (i = key.attachment_count; i < ARRAY_SIZE(key.vk_formats); ++i)
         assert(key.vk_formats[i] == VK_FORMAT_UNDEFINED);
 
-    WARN("VK_FORMAT_UNDEFINED validation passed\n")
+    WARN("VK_FORMAT_UNDEFINED validation passed\n");
 
     key.sample_count = graphics->ms_desc.rasterizationSamples;
 
