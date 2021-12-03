@@ -2925,6 +2925,7 @@ static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
          * Otherwise, we are very likely to hit the DS write / stencil read layout. */
         if (!(aspects & VK_IMAGE_ASPECT_DEPTH_BIT))
         {
+            WARN("No Stencil aspect depth bit\n");
             key.flags |= (key.flags & VKD3D_RENDER_PASS_KEY_STENCIL_ENABLE) ?
                     VKD3D_RENDER_PASS_KEY_DEPTH_ENABLE : 0;
             key.flags |= (key.flags & VKD3D_RENDER_PASS_KEY_STENCIL_WRITE) ?
@@ -2934,6 +2935,7 @@ static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
 
         if (!(aspects & VK_IMAGE_ASPECT_STENCIL_BIT))
         {
+            WARN("No Stencil aspect bit\n");
             key.flags |= (key.flags & VKD3D_RENDER_PASS_KEY_DEPTH_ENABLE) ?
                     VKD3D_RENDER_PASS_KEY_STENCIL_ENABLE : 0;
             key.flags |= (key.flags & VKD3D_RENDER_PASS_KEY_DEPTH_WRITE) ?
