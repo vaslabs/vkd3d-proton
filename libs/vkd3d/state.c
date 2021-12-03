@@ -2894,6 +2894,7 @@ static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
                 key.flags |= VKD3D_RENDER_PASS_KEY_DEPTH_ENABLE;
                 if (graphics->ds_desc.depthWriteEnable)
                 {
+                    WARN("Setting plane optimal mask\n");
                     key.flags |= VKD3D_RENDER_PASS_KEY_DEPTH_WRITE;
                     plane_optimal_mask |= VKD3D_DEPTH_PLANE_OPTIMAL;
                 }
@@ -2946,6 +2947,9 @@ static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
 
     if (key.attachment_count != ARRAY_SIZE(key.vk_formats))
         key.vk_formats[ARRAY_SIZE(key.vk_formats) - 1] = VK_FORMAT_UNDEFINED;
+    
+    WARN("Key attachment count %u, for array size %u", key.attachment_count, ARRAY_SIZE(key.vk_formats));
+
     for (i = key.attachment_count; i < ARRAY_SIZE(key.vk_formats); ++i)
         assert(key.vk_formats[i] == VK_FORMAT_UNDEFINED);
 
