@@ -2859,11 +2859,13 @@ static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
     {
         if (graphics->dsv_format)
         {
+            WARN("DYNAMIC GRAPHICS DSV FORMAT")
             dsv_format = graphics->dsv_format->vk_format;
             aspects = graphics->dsv_format->vk_aspect_mask;
         }
         else if (graphics->null_attachment_mask & dsv_attachment_mask(graphics))
         {
+            WARN("ATTACHMENT DYNAMIC DSV FORMAT")
             dsv_format = dynamic_dsv_format->vk_format;
             aspects = dynamic_dsv_format->vk_aspect_mask;
         }
@@ -4102,12 +4104,12 @@ VkPipeline d3d12_pipeline_state_create_pipeline_variant(struct d3d12_pipeline_st
      * If we notice that the base pipeline's DSV format does not match the dynamic DSV format, we fall-back to create a new render pass. */
     if (graphics->dsv_format != dsv_format && (graphics->null_attachment_mask & dsv_attachment_mask(graphics)))
     {
-        TRACE("Compiling %p with fallback DSV format %#x.\n", state,
+        WARN("Compiling %p with fallback DSV format %#x.\n", state,
                 dsv_format ? dsv_format->vk_format : VK_FORMAT_UNDEFINED);
     }
     else if (!dsv_format && graphics->dsv_format)
     {
-        TRACE("Compiling %p with fallback NULL DSV format.\n", state);
+        WARN("Compiling %p with fallback NULL DSV format.\n", state);
         fallback_ds_desc = graphics->ds_desc;
         fallback_ds_desc.depthTestEnable = VK_FALSE;
         fallback_ds_desc.depthWriteEnable = VK_FALSE;
