@@ -2862,6 +2862,11 @@ static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
             dsv_format = graphics->dsv_format->vk_format;
             aspects = graphics->dsv_format->vk_aspect_mask;
         }
+        else if (graphics->null_attachment_mask & dsv_attachment_mask(graphics))
+        {
+            dsv_format = dynamic_dsv_format->vk_format;
+            aspects = dynamic_dsv_format->vk_aspect_mask;
+        }
     }
 
     if (dsv_format)
