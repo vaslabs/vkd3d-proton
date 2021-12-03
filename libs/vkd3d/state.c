@@ -2905,10 +2905,12 @@ static HRESULT d3d12_graphics_pipeline_state_create_render_pass_for_plane_mask(
         {
             if (plane_optimal_mask & VKD3D_STENCIL_PLANE_OPTIMAL)
             {
+                WARN("Stencil bit and stencil plane optimal\n");
                 key.flags |= VKD3D_RENDER_PASS_KEY_STENCIL_ENABLE | VKD3D_RENDER_PASS_KEY_STENCIL_WRITE;
             }
             else if (graphics->ds_desc.stencilTestEnable)
             {
+                WARN("Stencil bit and stencilTestEnable\n");
                 key.flags |= VKD3D_RENDER_PASS_KEY_STENCIL_ENABLE;
                 if (graphics->ds_desc.front.writeMask != 0)
                 {
