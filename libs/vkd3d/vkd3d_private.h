@@ -1537,6 +1537,9 @@ static inline bool d3d12_pipeline_state_is_graphics(const struct d3d12_pipeline_
 
 static inline bool d3d12_pipeline_state_has_unknown_dsv_format(struct d3d12_pipeline_state *state)
 {
+    if (vkd3d_config_flags & VKD3D_CONFIG_DSV_FORMAT_ALWAYS_UNKNOWN) {
+        return true;
+    }
     if (d3d12_pipeline_state_is_graphics(state))
     {
         struct d3d12_graphics_pipeline_state *graphics = &state->graphics;
